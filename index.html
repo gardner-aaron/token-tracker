@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="manifest" href="manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#3498db">
     <title>MTG Token Tracker Pro</title>
     <style>
         :root {
@@ -112,6 +114,12 @@
 
         #log-container { height: 80px; overflow-y: auto; background: #000; font-family: monospace; font-size: 0.7rem; padding: 8px; margin-top: 10px; color: #888; border-radius: 4px; }
     </style>
+    <script>
+      // Register the Service Worker
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js');
+      }
+    </script>
 </head>
 <body>
 
@@ -323,4 +331,5 @@
     render();
 </script>
 </body>
+
 </html>
