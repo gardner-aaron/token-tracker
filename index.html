@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTG Token Tracker Pro</title>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --card: #1a1a1a;
+            --text: #f0f0f0;
+            --accent: #3498db;
+            --dino: #27ae60;
+            --danger: #e74c3c;
+            --overlay-bg: rgba(0, 0, 0, 0.6);
+            --disabled: rgba(40, 40, 40, 0.8);
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 10px;
+            padding-bottom: 120px;
+        }
+
+        /* Nav & Menu */
+        .nav-bar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid #333; margin-bottom: 15px; }
+        #menu-overlay {
+            position: fixed; top: 0; right: -280px; width: 250px; height: 100%;
+            background: #111; box-shadow: -5px 0 15px rgba(0,0,0,0.7);
+            z-index: 1000; padding: 20px; transition: right 0.3s ease;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        #menu-overlay.open { right: 0; }
+        .btn-toggle { background: #222; border: 1px solid #444; color: #888; padding: 12px; border-radius: 4px; text-align: left; }
+        .btn-toggle.active { border-color: var(--accent); color: white; background: #1a2a3a; }
+
+        /* Token Card */
+        .token-card {
+            background: var(--card);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+        .token-title { 
+            background: #222; padding: 8px; text-align: center; font-weight: bold; 
+            font-size: 0.9rem; letter-spacing: 1px; border-bottom: 1px solid #333;
+        }
+
+        .token-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; }
+
+        /* Image Box & Overlays */
+        .image-box {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1.4;
+            background: #000;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .token-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+        .tapped-img { transform: rotate(90deg) scale(0.85); }
+
+        .count-overlay {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 3rem; font-weight: 900; pointer-events: none; z-index: 5;
+            text-shadow: 0 0 15px black, 0 0 5px black;
+        }
+
+        .overlay-top, .overlay-bottom {
+            position: absolute; width: 100%; height: 35%;
+            display: flex; align-items: center; justify-content: space-around;
+            padding: 5px; box-sizing: border-box; z-index: 10;
+        }
+        .overlay-top { top: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); }
+        .overlay-bottom { bottom: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); }
+
+        /* Icons & Buttons */
+        .btn-icon {
+            background: var(--overlay-bg);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            border-radius: 50%;
+            width: 45px; height: 45px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; cursor: pointer; transition: 0.2s;
+        }
+        .btn-icon:active { transform: scale(0.9); background: var(--accent); }
+        .btn-icon:disabled { background: var(--disabled); color: #444; border: none; cursor: not-allowed; }
+
+        select {
+            background: rgba(0,0,0,0.8); color: white; border: 1px solid #555;
+            border-radius: 4px; padding: 5px; width: 50px; font-weight: bold;
+        }
+
+        .symbol { font-family: sans-serif; font-weight: bold; }
+        .tap-symbol { font-size: 1.8rem; } /* ↷ */
+        .untap-symbol { font-size: 1.8rem; } /* ↶ */
+        .sac-symbol { font-size: 1.6rem; color: #ff7675; } /* ☠ */
+
+        /* Footer */
+        .footer {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: #111; padding: 12px; display: grid;
+            grid-template-columns: repeat(4, 1fr); gap: 10px;
+            border-top: 1px solid #333; z-index: 100;
+        }
+        .footer-btn { padding: 10px; border-radius: 6px; font-weight: bold; border: none; color: white; background: #333; }
+
+        #log-container { height: 80px; overflow-y: auto; background: #000; font-family: monospace; font-size: 0.7rem; padding: 8px; margin-top: 10px; color: #888; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <h3 style="margin:0; letter-spacing: 2px;">TOKEN TRACKER</h3>
+        <button onclick="toggleMenu()" style="background:none; border:none; font-size: 1.8rem; color: white;">☰</button>
+    </div>
+
+    <div id="menu-overlay">
+        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <span style="font-weight:bold">EFFECTS</span>
+            <button onclick="toggleMenu()" style="background:none; color:white; border:none; font-size: 1.5rem;">✕</button>
+        </div>
+        <button id="eff-peregrin" class="btn-toggle" onclick="toggleEffect('peregrin')">Peregrin Took</button>
+        <button id="eff-manufactor" class="btn-toggle" onclick="toggleEffect('manufactor')">Academy Manufactor</button>
+        <button id="eff-parallel" class="btn-toggle" onclick="toggleEffect('parallel')">Parallel Lives</button>
+        <button id="eff-doubling" class="btn-toggle" onclick="toggleEffect('doubling')">Doubling Season</button>
+        <button id="eff-mondrak" class="btn-toggle" onclick="toggleEffect('mondrak')">Mondrak</button>
+        <button id="eff-dinosaurs" class="btn-toggle" onclick="toggleEffect('dinosaurs')">Displaced Dinosaurs</button>
+    </div>
+
+    <div id="token-list"></div>
+
+    <div id="log-container"></div>
+
+    <div class="footer">
+        <button class="footer-btn" onclick="undo()">UNDO</button>
+        <button class="footer-btn" onclick="clearLog()">LOG</button>
+        <button class="footer-btn" style="background:#c0392b" onclick="resetGame()">RESET</button>
+        <button class="footer-btn" style="background:var(--accent)" onclick="nextTurn()">UNTAP ALL</button>
+    </div>
+
+<script>
+    const imgMap = {
+        Clue: "Clue.jpg", Food: "Food.jpg", Treasure: "Treasure.jpg",
+        DinoClue: "Dino_Clue.jpg", DinoFood: "Dino_Food.jpg", DinoTreasure: "Dino_Treasure.jpg"
+    };
+
+    let state = {
+        effects: { peregrin: false, manufactor: false, parallel: false, doubling: false, mondrak: false, dinosaurs: false },
+        tokens: { 
+            Clue: { u: 0, t: 0 }, Food: { u: 0, t: 0 }, Treasure: { u: 0, t: 0 }, 
+            DinoClue: { u: 0, t: 0 }, DinoFood: { u: 0, t: 0 }, DinoTreasure: { u: 0, t: 0 } 
+        }
+    };
+
+    let historyStack = [];
+
+    function saveHistory() {
+        if (historyStack.length > 20) historyStack.shift();
+        historyStack.push(JSON.stringify(state));
+    }
+
+    function undo() {
+        if (historyStack.length > 0) {
+            state = JSON.parse(historyStack.pop());
+            log("Undid last action");
+            render();
+            for (let e in state.effects) {
+                let el = document.getElementById(`eff-${e}`);
+                if(el) el.classList.toggle('active', state.effects[e]);
+            }
+        }
+    }
+
+    function log(msg) {
+        const container = document.getElementById('log-container');
+        container.innerHTML += `<div>> ${msg}</div>`;
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function toggleMenu() { document.getElementById('menu-overlay').classList.toggle('open'); }
+
+    function toggleEffect(id) {
+        saveHistory();
+        state.effects[id] = !state.effects[id];
+        document.getElementById(`eff-${id}`).classList.toggle('active');
+        log(`${id.toUpperCase()} ${state.effects[id] ? 'ON' : 'OFF'}`);
+        render();
+    }
+
+    function addToken(type, cardKey) {
+        saveHistory();
+        const dropdown = document.getElementById(`select-${cardKey}`);
+        let baseAmount = dropdown.value === "manual" ? parseInt(prompt("Amount?", "1")) : parseInt(dropdown.value);
+        if (isNaN(baseAmount) || baseAmount <= 0) return;
+
+        let counts = { Clue: 0, Food: 0, Treasure: 0 };
+        counts[type] = baseAmount;
+        if (state.effects.peregrin) counts.Food += 1;
+        if (state.effects.manufactor) {
+            let sum = counts.Clue + counts.Food + counts.Treasure;
+            counts.Clue = sum; counts.Food = sum; counts.Treasure = sum;
+        }
+
+        let mult = (state.effects.parallel ? 2 : 1) * (state.effects.doubling ? 2 : 1) * (state.effects.mondrak ? 2 : 1);
+
+        for (let t in counts) {
+            let final = counts[t] * mult;
+            if (final > 0) {
+                let key = state.effects.dinosaurs ? 'Dino' + t : t;
+                state.tokens[key].u += final;
+                log(`Created ${final} ${key}`);
+            }
+        }
+        render();
+    }
+
+    function modify(key, field, amt, label) {
+        if (state.tokens[key][field] + amt >= 0) {
+            saveHistory();
+            state.tokens[key][field] += amt;
+            if(label) log(`${label} ${key}`);
+            render();
+        }
+    }
+
+    function tapAction(key, isUntap) {
+        if (!isUntap && state.tokens[key].u > 0) {
+            saveHistory();
+            state.tokens[key].u--; state.tokens[key].t++;
+            render();
+        } else if (isUntap && state.tokens[key].t > 0) {
+            saveHistory();
+            state.tokens[key].u++; state.tokens[key].t--;
+            render();
+        }
+    }
+
+    function nextTurn() {
+        saveHistory();
+        for (let k in state.tokens) {
+            state.tokens[k].u += state.tokens[k].t;
+            state.tokens[k].t = 0;
+        }
+        log("TURN UNTAPPED ALL");
+        render();
+    }
+
+    function resetGame() {
+        if (confirm("Reset Game? This clears all tokens and effects.")) {
+            saveHistory();
+            for (let k in state.tokens) state.tokens[k] = { u: 0, t: 0 };
+            for (let e in state.effects) {
+                state.effects[e] = false;
+                let el = document.getElementById(`eff-${e}`);
+                if(el) el.classList.remove('active');
+            }
+            log("GAME RESET");
+            render();
+        }
+    }
+
+    function clearLog() { document.getElementById('log-container').innerHTML = ''; }
+
+    function render() {
+        const container = document.getElementById('token-list');
+        container.innerHTML = '';
+
+        Object.keys(state.tokens).forEach(key => {
+            const isDino = key.startsWith('Dino');
+            const total = state.tokens[key].u + state.tokens[key].t;
+            // Persistent Dinos logic
+            if (isDino && !state.effects.dinosaurs && total === 0) return;
+            
+            const card = document.createElement('div');
+            card.className = `token-card`;
+            const baseType = key.replace('Dino', '');
+            const addDisabled = (state.effects.dinosaurs && !isDino) || (!state.effects.dinosaurs && isDino);
+            const imageFile = imgMap[key];
+
+            card.innerHTML = `
+                <div class="token-title" style="color:${isDino ? '#27ae60' : 'white'}">
+                    ${isDino ? '🦖 ' + key.toUpperCase() : key.toUpperCase()}
+                </div>
+                <div class="token-grid">
+                    <div class="image-box">
+                        <img src="${imageFile}" class="token-img">
+                        <div class="count-overlay">${state.tokens[key].u}</div>
+                        <div class="overlay-top">
+                            <select id="select-${key}">
+                                ${[1,2,3,4,5,10].map(n => `<option value="${n}">${n}</option>`).join('')}
+                                <option value="manual">...</option>
+                            </select>
+                            <button class="btn-icon btn-add" ${addDisabled ? 'disabled' : ''} onclick="addToken('${baseType}', '${key}')">+</button>
+                        </div>
+                        <div class="overlay-bottom">
+                            <button class="btn-icon" onclick="modify('${key}','u',-1,'Sac')"><span class="sac-symbol">☠</span></button>
+                            <button class="btn-icon" onclick="tapAction('${key}', false)"><span class="tap-symbol">↷</span></button>
+                        </div>
+                    </div>
+
+                    <div class="image-box">
+                        <img src="${imageFile}" class="token-img tapped-img">
+                        <div class="count-overlay">${state.tokens[key].t}</div>
+                        <div class="overlay-top">
+                            <button class="btn-icon" onclick="tapAction('${key}', true)"><span class="untap-symbol">↶</span></button>
+                        </div>
+                        <div class="overlay-bottom">
+                            <button class="btn-icon" onclick="modify('${key}','t',-1,'Sac')"><span class="sac-symbol">☠</span></button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    render();
+</script>
+</body>
+</html>
