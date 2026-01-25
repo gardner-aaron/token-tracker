@@ -291,11 +291,10 @@
             const addDisabled = (state.effects.dinosaurs && !isDino) || (!state.effects.dinosaurs && isDino);
             const imageFile = imgMap[key];
 
-            // Trying to change the Dino cards to have a green background
-            if (isDino) document.getElementById('token-card').background="#27ae60";
-
             card.innerHTML = `
-                
+                <div class="token-title" style="color:${isDino ? '#27ae60' : 'white'}">
+                    ${isDino ? '🦖 ' + key.toUpperCase() : key.toUpperCase()}
+                </div>
                 <div class="token-grid">
                     <div class="image-box">
                         <img src="${imageFile}" class="token-img">
@@ -334,6 +333,7 @@
 </body>
 
 </html>
+
 
 
 
