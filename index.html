@@ -43,7 +43,7 @@
         .token-card {
             background: var(--card);
             border-radius: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 2px;
             overflow: hidden;
             border: 1px solid #333;
         }
@@ -292,9 +292,11 @@
             const imageFile = imgMap[key];
 
             card.innerHTML = `
+                <!--
                 <div class="token-title" style="color:${isDino ? '#27ae60' : 'white'}">
                     ${isDino ? '🦖 ' + key.toUpperCase() : key.toUpperCase()}
                 </div>
+                -->
                 <div class="token-grid">
                     <div class="image-box">
                         <img src="${imageFile}" class="token-img">
@@ -333,3 +335,4 @@
 </body>
 
 </html>
+
