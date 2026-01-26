@@ -201,6 +201,41 @@
     <div id="token-list"></div>
 
 <script>
+	
+    let wakeLock = null;
+
+	// Function to request the wake lock
+	const requestWakeLock = async () => {
+	  try {
+		// navigator.wakeLock is the entry point
+		wakeLock = await navigator.wakeLock.request('screen');
+		
+		// Optional: Listen for when the lock is released (by system or manually)
+		wakeLock.addEventListener('release', () => {
+		  console.log('Wake Lock was released');
+		});
+		
+		console.log('Wake Lock is active');
+	  } catch (err) {
+		// Rejection can happen due to low battery or system power-save mode
+		console.error(`${err.name}, ${err.message}`);
+	  }
+	};
+
+	// Function to manually release the lock
+	const releaseWakeLock = async () => {
+	  if (wakeLock !== null) {
+		await wakeLock.release();
+		wakeLock = null;
+	  }
+	};
+	
+	if ('wakeLock' in navigator) {
+	  // PWA supports Wake Lock
+	}
+	
+	
+	
     const imgMap = {
         Clue: "Clue.jpg", Food: "Food.jpg", Treasure: "Treasure.jpg",
         DinoClue: "Dino_Clue.jpg", DinoFood: "Dino_Food.jpg", DinoTreasure: "Dino_Treasure.jpg"
@@ -398,4 +433,5 @@
 </script>
 </body>
 </html>
+
 
