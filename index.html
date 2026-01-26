@@ -202,37 +202,36 @@
 
 <script>
 	
-    let wakeLock = null;
-
-	// Function to request the wake lock
-	const requestWakeLock = async () => {
-	  try {
-		// navigator.wakeLock is the entry point
-		wakeLock = await navigator.wakeLock.request('screen');
-		
-		// Optional: Listen for when the lock is released (by system or manually)
-		wakeLock.addEventListener('release', () => {
-		  console.log('Wake Lock was released');
-		});
-		
-		console.log('Wake Lock is active');
-	  } catch (err) {
-		// Rejection can happen due to low battery or system power-save mode
-		console.error(`${err.name}, ${err.message}`);
+	function toggleWakeLock(){
+	  if (!navigator.wakeLock){
+	    alert("Your device does not support the Wake Lock API. Try on an Android phone or on a device running iOS 16.4 or higher!");
 	  }
-	};
-
-	// Function to manually release the lock
-	const releaseWakeLock = async () => {
-	  if (wakeLock !== null) {
-		await wakeLock.release();
-		wakeLock = null;
+	  else if (window.currentWakeLock && !window.currentWakeLock.released){
+	    releaseScreen();
 	  }
-	};
+	  else {
+	    lockScreen();
+	  }
 	
-	if ('wakeLock' in navigator) {
-	  // PWA supports Wake Lock
 	}
+	
+	async function lockScreen(){
+	   try {
+	       window.currentWakeLock = await navigator.wakeLock.request();
+	       document.getElementById('wake-lock-btn').innerHTML = "Release Wake Lock";
+	       alert('Wake Lock enabled');
+	    }
+	    catch(err){
+	      alert(err);
+	    }
+	}
+	
+	async function releaseScreen(){
+	  window.currentWakeLock.release();
+	  document.getElementById('wake-lock-btn').innerHTML = "Start Wake Lock";
+	  alert('Wake Lock released');
+	}
+
 	
 	
 	
@@ -433,5 +432,6 @@
 </script>
 </body>
 </html>
+
 
 
