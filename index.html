@@ -337,6 +337,7 @@
                 let el = document.getElementById(`eff-${e}`);
                 if(el) el.classList.remove('active');
             }
+			document.getElementById('btn-peregrin-bonus').disabled = !state.effects.peregrin;
             log("GAME RESET");
             render();
             toggleMenu();
@@ -397,3 +398,4 @@
 </script>
 </body>
 </html>
+
