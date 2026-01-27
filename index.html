@@ -30,13 +30,16 @@
         }
 
         .nav-bar { 
-            display: flex; 
-            align-items: center; 
-            padding: 10px; 
+            /* display: flex; */
+            /* align-items: center; */
+            padding: 2px; 
             background: #111; 
-            border-bottom: 1px solid #333;
-            gap: 8px;
+            /* border-bottom: 1px solid #333; */
+            /* gap: 8px; */
             z-index: 100;
+			position: fixed;
+			top: 0;
+			right: 0;
         }
         .nav-title { font-weight: bold; font-size: 0.8rem; flex-grow: 1; letter-spacing: 1px; }
         .nav-btn { 
@@ -163,15 +166,14 @@
 <body id="main-body">
 
     <div class="nav-bar">
-        <span class="nav-title">TOKEN TRACKER</span>
-        <button class="nav-btn" onclick="undo()">UNDO</button>
-        <button class="nav-btn accent" onclick="nextTurn()">UNTAP ALL</button>
         <button onclick="toggleMenu()" style="background:none; border:none; font-size: 1.8rem; color: white;">☰</button>
     </div>
 
     <div id="menu-overlay">
         <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <span style="font-weight:bold">DASHBOARD</span>
+            <span style="font-weight:bold"></span>
+			<button class="nav-btn" onclick="undo()">UNDO</button>
+			<button class="nav-btn accent" onclick="nextTurn()">NEXT TURN</button>
             <button onclick="toggleMenu()" style="background:none; color:white; border:none; font-size: 1.5rem;">✕</button>
         </div>
         
@@ -433,7 +435,6 @@
 </script>
 </body>
 </html>
-
 
 
 
