@@ -419,8 +419,8 @@
             const card = document.createElement('div');
             card.className = `token-card ${isDino ? 'is-dino' : ''}`;
             
-            // Disable ADD buttons for non-dinos when Displaced Dinos is active
-            const addDisabled = state.effects.dinosaurs && !isDino;
+            // Disable ADD buttons for non-dinos when Displaced Dinos is active and disable ADD buttons for dinos when not active
+            const addDisabled = state.effects.dinosaurs && !isDino || !state.effects.dinosaurs && isDino;
 
             card.innerHTML = `
                 <div class="image-box">
@@ -454,3 +454,4 @@
 </script>
 </body>
 </html>
+
