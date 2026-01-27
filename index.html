@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MTG Token Tracker Pro</title>
+    <title>Token Tracker</title>
     <style>
         :root {
             --bg: #0a0a0a;
@@ -30,13 +30,16 @@
         }
 
         .nav-bar { 
-            display: flex; 
-            align-items: center; 
-            padding: 10px; 
+            /* display: flex; */
+            /* align-items: center; */
+            padding: 2px; 
             background: #111; 
-            border-bottom: 1px solid #333;
-            gap: 8px;
+            /* border-bottom: 1px solid #333; */
+            /* gap: 8px; */
             z-index: 100;
+			position: fixed;
+			top: 0;
+			right: 0;
         }
         .nav-title { font-weight: bold; font-size: 0.8rem; flex-grow: 1; letter-spacing: 1px; }
         .nav-btn { 
@@ -163,15 +166,14 @@
 <body id="main-body">
 
     <div class="nav-bar">
-        <span class="nav-title">TOKEN TRACKER</span>
-        <button class="nav-btn" onclick="undo()">UNDO</button>
-        <button class="nav-btn accent" onclick="nextTurn()">UNTAP ALL</button>
         <button onclick="toggleMenu()" style="background:none; border:none; font-size: 1.8rem; color: white;">☰</button>
     </div>
 
     <div id="menu-overlay">
         <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <span style="font-weight:bold">DASHBOARD</span>
+            <span style="font-weight:bold"></span>
+			<button class="nav-btn" onclick="undo()">UNDO</button>
+			<button class="nav-btn accent" onclick="nextTurn()">NEXT TURN</button>
             <button onclick="toggleMenu()" style="background:none; color:white; border:none; font-size: 1.5rem;">✕</button>
         </div>
         
@@ -189,6 +191,7 @@
             <span class="menu-label">ACTIONS</span>
             <button id="btn-peregrin-bonus" class="btn-action" onclick="addPeregrinBonus()" disabled>Add Peregrin Food</button>
             <button class="btn-action" onclick="clearLog()">Clear Log</button>
+            <button id="wake-lock-btn" class="btn-action" onclick="toggleWakeLock()">Wake Lock</button>
             <button class="btn-action btn-danger" onclick="resetGame()">Reset Game</button>
         </div>
 
@@ -201,6 +204,40 @@
     <div id="token-list"></div>
 
 <script>
+	
+	function toggleWakeLock(){
+	  if (!navigator.wakeLock){
+	    alert("Your device does not support the Wake Lock API. Try on an Android phone or on a device running iOS 16.4 or higher!");
+	  }
+	  else if (window.currentWakeLock && !window.currentWakeLock.released){
+	    releaseScreen();
+	  }
+	  else {
+	    lockScreen();
+	  }
+	
+	}
+	
+	async function lockScreen(){
+	   try {
+	       window.currentWakeLock = await navigator.wakeLock.request();
+	       document.getElementById('wake-lock-btn').innerHTML = "Release Wake Lock";
+	       alert('Wake Lock enabled');
+	    }
+	    catch(err){
+	      alert(err);
+	    }
+	}
+	
+	async function releaseScreen(){
+	  window.currentWakeLock.release();
+	  document.getElementById('wake-lock-btn').innerHTML = "Start Wake Lock";
+	  alert('Wake Lock released');
+	}
+
+	
+	
+	
     const imgMap = {
         Clue: "Clue.jpg", Food: "Food.jpg", Treasure: "Treasure.jpg",
         DinoClue: "Dino_Clue.jpg", DinoFood: "Dino_Food.jpg", DinoTreasure: "Dino_Treasure.jpg"
@@ -398,4 +435,7 @@
 </script>
 </body>
 </html>
+
+
+
 
