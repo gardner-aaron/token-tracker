@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<link rel="manifest" href="manifest.json">
+	
     <title>Token Tracker</title>
-    <style>
+    
+	<style>
         :root {
             --bg: #0a0a0a;
             --card: #121212;
@@ -38,8 +41,8 @@
             /* gap: 8px; */
             z-index: 100;
 			position: fixed;
-			top: 0;
-			right: 0;
+			top: 10px;
+			right: 10px;
         }
         .nav-title { font-weight: bold; font-size: 0.8rem; flex-grow: 1; letter-spacing: 1px; }
         .nav-btn { 
@@ -172,8 +175,8 @@
     <div id="menu-overlay">
         <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
             <span style="font-weight:bold"></span>
-			<button class="nav-btn" onclick="undo()">UNDO</button>
-			<button class="nav-btn accent" onclick="nextTurn()">NEXT TURN</button>
+			<button class="nav-btn" onclick="undo()">Undo</button>
+			<button class="nav-btn accent" onclick="nextTurn()">Next Turn</button>
             <button onclick="toggleMenu()" style="background:none; color:white; border:none; font-size: 1.5rem;">✕</button>
         </div>
         
@@ -190,6 +193,7 @@
         <div class="menu-section">
             <span class="menu-label">ACTIONS</span>
             <button id="btn-peregrin-bonus" class="btn-action" onclick="addPeregrinBonus()" disabled>Add Peregrin Food</button>
+            <button id="btn-nukacola-treasure" class="btn-action" onclick="addNukaColaTreasure()">Add Nuka-Cola Treasure</button>
             <button class="btn-action" onclick="clearLog()">Clear Log</button>
             <button id="wake-lock-btn" class="btn-action" onclick="toggleWakeLock()">Wake Lock</button>
             <button class="btn-action btn-danger" onclick="resetGame()">Reset Game</button>
@@ -296,9 +300,19 @@
     function addPeregrinBonus() {
         if (!state.effects.peregrin) return;
         saveHistory();
-        processTokens({ Clue: 0, Food: 1, Treasure: 0 }, "Peregrin Bonus");
+        processTokens({ Clue: 0, Food: 1, Treasure: 0 }, "Peregrin Bonus", false);
         render();
     }
+	
+	// Logic for when a Nuka-Cola Vending Machine trigger creates a tapped Treasure when sacing a food
+	// All tokens created alongside that Treasure as a replacement effect are also tapped
+	function addNukaColaTreasure() {
+		let counts = { Clue: 0, Food: 0, Treasure: 1 };
+		if (state.effects.peregrin) counts.Food += 1;
+		
+		processTokens(counts, "Nuka-Cola Treasure", true);
+		render();
+	}
 
     function addToken(type, cardKey) {
         saveHistory();
@@ -309,11 +323,11 @@
         counts[type] = baseAmount;
         if (state.effects.peregrin) counts.Food += 1;
 
-        processTokens(counts, `Added ${baseAmount} ${type}`);
+        processTokens(counts, `Added ${baseAmount} ${type}`, false);
         render();
     }
 
-    function processTokens(counts, logMsg) {
+    function processTokens(counts, logMsg, tappedToken) {
         // Academy Manufactor conversion
         if (state.effects.manufactor) {
             let sum = counts.Clue + counts.Food + counts.Treasure;
@@ -327,7 +341,12 @@
             let final = counts[t] * mult;
             if (final > 0) {
                 let key = state.effects.dinosaurs ? 'Dino' + t : t;
-                state.tokens[key].u += final;
+                if (tappedToken){
+					state.tokens[key].t += final;
+				}
+				else {
+					state.tokens[key].u += final;
+				}
             }
         }
         log(logMsg);
@@ -435,7 +454,3 @@
 </script>
 </body>
 </html>
-
-
-
-
