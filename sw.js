@@ -1,4 +1,4 @@
-const CACHE_NAME = 'token-v1';
+const CACHE_NAME = 'token-v2';
 const ASSETS = [
   './',
   './index.html',
