@@ -304,7 +304,7 @@
         render();
     }
 	
-	// Logic for when a Nuka-Cola Vending Machine trigger creates a tapped Treasure when sacing a food
+	// Logic for when a Nuka-Cola Vending Machine trigger creates a tapped Treasure when sacrificing a food
 	// All tokens created alongside that Treasure as a replacement effect are also tapped
 	function addNukaColaTreasure() {
 		let counts = { Clue: 0, Food: 0, Treasure: 1 };
@@ -337,6 +337,9 @@
         // Apply multipliers
         let mult = (state.effects.parallel ? 2 : 1) * (state.effects.doubling ? 2 : 1) * (state.effects.mondrak ? 2 : 1);
 
+		// Line separator to see the results of a single action in the log
+		log('----------------');
+		
         for (let t in counts) {
             let final = counts[t] * mult;
             if (final > 0) {
@@ -347,9 +350,12 @@
 				else {
 					state.tokens[key].u += final;
 				}
+				
+				// Describes each type of token created in the log
+				log(`Added ${final} ${tappedToken ? 'tapped' : ''} ${state.effects.dinosaurs ? 'Dino' : ''}${t}${final > 1 ? 's' : ''}`);
             }
         }
-        log(logMsg);
+		
 		render();
     }
 
@@ -357,7 +363,9 @@
         if (state.tokens[key][field] + amt >= 0) {
             saveHistory();
             state.tokens[key][field] += amt;
-            log(`${amt > 0 ? 'Added' : 'Saced'} ${key}`);
+			
+			// Technically don't need anything but the key, but it was originall made to handle adding as well
+            log(`${amt > 0 ? 'Added' : 'Sacrificed'} ${Math.abs(amt)} ${key}`);
             render();
         }
     }
@@ -454,5 +462,4 @@
 </script>
 </body>
 </html>
-
 
