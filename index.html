@@ -413,7 +413,7 @@
                 if(el) el.classList.remove('active');
             }
 			document.getElementById('btn-peregrin-bonus').disabled = !state.effects.peregrin;
-            log("GAME RESET");
+            clearLog();
             render();
             toggleMenu();
         }
@@ -421,7 +421,6 @@
 
     function clearLog() {
         document.getElementById('log-container').innerHTML = '';
-        log("Log Cleared");
     }
 
     function render() {
