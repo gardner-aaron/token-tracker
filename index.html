@@ -64,12 +64,17 @@
             gap: 8px;
             padding: 8px;
             overflow-y: auto;
-            align-content: start;
+            align-content: center;
+			overflow: hidden;
         }
 
         /* Responsive Layouts */
         @media (orientation: portrait) {
-            #token-list { grid-template-columns: 1fr; }
+            #token-list {
+				grid-template-columns: 1fr;
+				grid-auto-rows: 1fr;
+				align-items: center;
+			}
             .dino-active #token-list { grid-template-columns: repeat(2, 1fr); }
             .token-card { aspect-ratio: 1.4 / 1; } /* Horizontal cards in portrait to fit 3 */
         }
@@ -86,7 +91,9 @@
             grid-template-columns: 1fr 1fr; 
             gap: 4px;
             border-radius: 8px;
+			box-sizing: border-box;
             padding: 4px;
+			overflow: hidden;
         }
         
         /* Dino Card Background - Grid only */
