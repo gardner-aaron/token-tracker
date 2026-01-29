@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<link rel="manifest" href="manifest.json">
-	<link rel="icon" type="image/x-icon" href="icon-192.png">
+	<link rel="icon" type="image/x-icon" href="favicon.ico">
 	
     <title>Token Tracker</title>
     
@@ -189,6 +189,7 @@
             <button id="eff-doubling" class="btn-toggle" onclick="toggleEffect('doubling')">Doubling Season</button>
             <button id="eff-mondrak" class="btn-toggle" onclick="toggleEffect('mondrak')">Mondrak</button>
             <button id="eff-dinosaurs" class="btn-toggle" onclick="toggleEffect('dinosaurs')">Displaced Dinosaurs</button>
+            <button id="eff-chatterfang" class="btn-toggle" onclick="toggleEffect('chatterfang')">Chatterfang</button>
         </div>
 
         <div class="menu-section">
@@ -240,16 +241,20 @@
 	  alert('Wake Lock released');
 	}
 
+	const imgPath = "images/";
 	
-	
-	
-    const imgMap = {
-        Clue: "Clue.jpg", Food: "Food.jpg", Treasure: "Treasure.jpg",
-        DinoClue: "Dino_Clue.jpg", DinoFood: "Dino_Food.jpg", DinoTreasure: "Dino_Treasure.jpg"
+	const imgMap = {
+        Clue: imgPath + "Clue.jpg",
+		Food: imgPath + "Food.jpg",
+		Treasure: imgPath + "Treasure.jpg",
+        DinoClue: imgPath + "Dino_Clue.jpg",
+		DinoFood: imgPath + "Dino_Food.jpg",
+		DinoTreasure: imgPath + "Dino_Treasure.jpg"
     };
+	
 
     let state = {
-        effects: { peregrin: false, manufactor: false, parallel: false, doubling: false, mondrak: false, dinosaurs: false },
+        effects: { peregrin: false, manufactor: false, parallel: false, doubling: false, mondrak: false, dinosaurs: false, chatterfang: false },
         tokens: { 
             Clue: { u: 0, t: 0 }, Food: { u: 0, t: 0 }, Treasure: { u: 0, t: 0 }, 
             DinoClue: { u: 0, t: 0 }, DinoFood: { u: 0, t: 0 }, DinoTreasure: { u: 0, t: 0 } 
@@ -357,6 +362,11 @@
             }
         }
 		
+		if (state.effects.chatterfang) {
+			let total = (counts.Clue + counts.Food + counts.Treasure) * mult;
+			log(`Create ${total} ${tappedToken ? 'tapped' : ''} 1/1 green Squirrel creature token${total > 1 ? 's' : ''}`);
+		}
+		
 		render();
     }
 
@@ -365,7 +375,7 @@
             saveHistory();
             state.tokens[key][field] += amt;
 			
-			// Technically don't need anything but the key, but it was originall made to handle adding as well
+			// Technically don't need anything but the key, but it was originally made to handle adding as well
             log(`${amt > 0 ? 'Added' : 'Sacrificed'} ${Math.abs(amt)} ${key}`);
             render();
         }
@@ -463,6 +473,4 @@
 </script>
 </body>
 </html>
-
-
 
