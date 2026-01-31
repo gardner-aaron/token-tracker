@@ -203,8 +203,13 @@
             <span class="menu-label">ACTIONS</span>
             <button id="btn-peregrin-bonus" class="btn-action" onclick="addPeregrinBonus()" disabled>Add Peregrin Food</button>
             <button id="btn-nukacola-treasure" class="btn-action" onclick="addNukaColaTreasure()">Add Nuka-Cola Treasure</button>
+            <button id="btn-second-harvest" class="btn-action" onclick="secondHarvest()">Second Harvest</button>
+        </div>
+
+        <div class="menu-section">
+            <span class="menu-label">SETTINGS</span>
             <button class="btn-action" onclick="clearLog()">Clear Log</button>
-            <button id="wake-lock-btn" class="btn-action" onclick="toggleWakeLock()">Wake Lock</button>
+            <button id="wake-lock-btn" class="btn-action" onclick="toggleWakeLock()">Start Wake Lock</button>
             <button class="btn-action btn-danger" onclick="resetGame()">Reset Game</button>
         </div>
 
@@ -326,17 +331,31 @@
 		processTokens(counts, "Nuka-Cola Treasure", true);
 		render();
 	}
+	
+	function secondHarvest() {
+		let counts = {
+			Clue: state.tokens.Clue.u + state.tokens.Clue.t + state.tokens.DinoClue.t + state.tokens.DinoClue.u,
+			Food: state.tokens.Food.u + state.tokens.Food.t + state.tokens.DinoFood.t + state.tokens.DinoFood.u,
+			Treasure: state.tokens.Treasure.u + state.tokens.Treasure.t + state.tokens.DinoTreasure.t + state.tokens.DinoTreasure.u
+		};
+		
+		if (state.effects.peregrin) counts.Food += 1;
+		
+		processTokens(counts, "Doubled all tokens", false);
+		render();
+	}
 
     function addToken(type, cardKey) {
         saveHistory();
         const dropdown = document.getElementById(`select-${cardKey}`);
-        let baseAmount = parseInt(dropdown.value);
+        let baseAmount = dropdown.value === "manual" ? parseInt(prompt("Number of tokens", "1")) : parseInt(dropdown.value);
+        if (isNaN(baseAmount) || baseAmount <= 0) return;
 
         let counts = { Clue: 0, Food: 0, Treasure: 0 };
         counts[type] = baseAmount;
         if (state.effects.peregrin) counts.Food += 1;
 
-        processTokens(counts, `Added ${baseAmount} ${type}`, false);
+        processTokens(counts, null, false);
         render();
     }
 
@@ -352,6 +371,7 @@
 
 		// Line separator to see the results of a single action in the log
 		log('----------------');
+		if (logMsg != null) { log(logMsg) };
 		
         for (let t in counts) {
             let final = counts[t] * mult;
@@ -455,6 +475,7 @@
                         <div class="click-area">
                             <select id="select-${key}" onclick="event.stopPropagation()">
                                 ${[1,2,3,4,5,10].map(n => `<option value="${n}">${n}</option>`).join('')}
+                                <option value="manual">...</option>
                             </select>
                         </div>
                         <button class="click-area" ${addDisabled ? 'disabled' : ''} onclick="addToken('${baseType}', '${key}')">＋</button>
